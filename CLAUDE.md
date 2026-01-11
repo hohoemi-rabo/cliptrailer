@@ -17,126 +17,64 @@ npm start        # プロダクションサーバー起動
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15 (App Router), React 19, TypeScript (strict mode)
-- **Styling:** Tailwind CSS 3.4, Geist fonts
-- **Backend:** Supabase (Auth, PostgreSQL, Storage)
-- **AI Services:** NanoBananaPro (画像生成), Google Gemini TTS (音声), Mubert (BGM)
-- **Video Processing:** FFmpeg (サーバーサイド)
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS, shadcn/ui
+- **Backend:** Supabase (Auth, DB, Storage)
+- **Video:** FFmpeg（非同期処理）
 
 ## Architecture
 
 ```
 src/
-└── app/           # Next.js App Router
-    ├── layout.tsx # ルートレイアウト（フォント、メタデータ）
-    ├── page.tsx   # ホームページ
-    └── globals.css # Tailwind設定
-```
-
-**システム構成（予定）:**
-```
-Vercel (Frontend) → Job Queue (Inngest/Trigger.dev) → Video Processing Server → Supabase
+├── app/           # Next.js App Router
+├── components/    # UIコンポーネント
+├── lib/           # ユーティリティ、API連携
+└── types/         # 型定義
 ```
 
 ## Path Aliases
 
-`@/*` は `./src/*` にマッピングされています。
+`@/*` → `./src/*`
 
-## Key Configurations
+## Context-Aware Rules
 
-- TypeScript: strict mode有効、ES2017ターゲット
-- ESLint: next/core-web-vitals + next/typescript
-- Tailwind: CSS変数によるダークモード対応
+`.claude/rules/` に技術領域別のルールを配置。ファイルを触ると自動ロード。
 
-## MVP Workflow (6ステップ)
+| ルール | 対象 |
+|--------|------|
+| `frontend.md` | Next.js, React, shadcn/ui |
+| `supabase.md` | 認証, DB, Storage |
+| `video-processing.md` | FFmpeg, 動画合成 |
+| `api-integration.md` | 外部API連携 |
 
-1. note.com URLから記事取得
-2. AI による15秒スクリプト生成
-3. 4枚のAI画像生成
-4. TTS音声生成（男性/女性選択可）
-5. BGM選択（Mubert API）
-6. MP4動画出力（1080x1920、字幕・サムネイル・ハッシュタグ付き）
+## 開発チケット
 
-## Next.js 15 App Router ベストプラクティス
+`/docs` 配下にチケットファイルを管理。連番順に開発。
 
-### Server Components vs Client Components
+| No | 内容 |
+|----|------|
+| 00 | プロジェクト初期設定 |
+| 01 | 認証機能 |
+| 02 | UIレイアウト |
+| 03 | URL入力・記事取得 |
+| 04 | 台本生成 |
+| 05 | 画像生成 |
+| 06 | 音声生成 |
+| 07 | BGM選択 |
+| 08 | 動画書き出し |
+| 09 | マイページ |
+| 10 | 仕上げ |
 
-**デフォルトはServer Component** - `'use client'`ディレクティブがない限りServer Componentとして扱われる
+## Todo管理ルール
 
-```tsx
-// Server Component（デフォルト）- データ取得、静的コンテンツに最適
-export default async function Page() {
-  const data = await fetch('https://...')
-  return <div>{/* ... */}</div>
-}
+チケット内のタスクはMarkdownチェックボックスで管理。
 
-// Client Component - インタラクティブな要素に使用
-'use client'
-import { useState } from 'react'
-export default function Counter() {
-  const [count, setCount] = useState(0)
-  return <button onClick={() => setCount(count + 1)}>{count}</button>
-}
-```
-
-**コンポジションパターン:** Server ComponentからClient Componentをインポートして使用。`'use client'`境界は必要最小限に配置してバンドルサイズを最適化。
-
-### データフェッチング戦略
-
-```tsx
-// 静的データ（デフォルト、getStaticProps相当）
-const data = await fetch('https://...', { cache: 'force-cache' })
-
-// 動的データ（getServerSideProps相当）
-const data = await fetch('https://...', { cache: 'no-store' })
-
-// ISR（再検証付き）
-const data = await fetch('https://...', { next: { revalidate: 10 } })
-```
-
-### Server Actions
-
-```tsx
-// フォーム処理
-export default function Page() {
-  async function createItem(formData: FormData) {
-    'use server'
-    const name = formData.get('name')
-    // データ変更 → revalidatePath/revalidateTag
-  }
-  return <form action={createItem}>...</form>
-}
-
-// バリデーション（Zod推奨）
-import { z } from 'zod'
-const schema = z.object({ email: z.string().email() })
-```
-
-### 特殊ファイル規約
-
-| ファイル | 用途 |
-|---------|------|
-| `layout.tsx` | 共有UI、ネストされる |
-| `page.tsx` | ルートのユニークなUI |
-| `loading.tsx` | Suspenseローディング状態 |
-| `error.tsx` | エラーバウンダリ |
-| `not-found.tsx` | 404 UI |
-
-**レンダリング順序:** layout → template → error → loading → not-found → page
-
-### メタデータ
-
-```tsx
-// 静的メタデータ
-export const metadata: Metadata = { title: 'ページタイトル' }
-
-// 動的メタデータ
-export async function generateMetadata({ params }): Promise<Metadata> {
-  return { title: `${params.id}の詳細` }
-}
+```markdown
+- [ ] 未完了タスク
+- [x] 完了タスク
 ```
 
 ## Notes
 
-- 現在はMVPフェーズ（PC最適化優先）
-- Supabase MCP統合済み（.mcp.json）
+- MVPフェーズ（PC優先）
+- Supabase MCP統合済み
