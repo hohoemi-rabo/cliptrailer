@@ -21,13 +21,12 @@ Supabase AuthによるGoogleログイン機能を実装する。
 
 ## タスク
 
-- [ ] Supabase Auth設定（Google OAuth）
-- [ ] ログインページ作成（/login）
-- [ ] 認証コールバック処理（/auth/callback）
-- [ ] 認証状態管理（Context/Provider）
-- [ ] 保護されたルートのミドルウェア作成
-- [ ] ログアウト機能
-- [ ] 認証エラーハンドリング
+- [x] Supabase Auth設定（Google OAuth）
+- [x] ログインページ作成（/login）
+- [x] 認証コールバック処理（/auth/callback）
+- [x] 保護されたルートのミドルウェア作成
+- [x] ログアウト機能
+- [x] 認証エラーハンドリング
 
 ## 画面仕様
 
