@@ -3,23 +3,55 @@
 import { useState } from 'react'
 import { EditorLayout } from '@/components/layout/editor-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Step1UrlInput } from '@/components/steps/step1-url-input'
+import { Article } from '@/types/article'
+
+// プロジェクト全体の状態
+interface ProjectState {
+  article: Article | null
+  script: string | null
+  images: string[]
+  voiceUrl: string | null
+  voiceType: 'male' | 'female' | null
+  bgmUrl: string | null
+}
+
+const initialState: ProjectState = {
+  article: null,
+  script: null,
+  images: [],
+  voiceUrl: null,
+  voiceType: null,
+  bgmUrl: null,
+}
 
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [project, setProject] = useState<ProjectState>(initialState)
 
   const handleStepClick = (step: number) => {
     setCurrentStep(step)
   }
 
-  const handleNextStep = () => {
-    if (!completedSteps.includes(currentStep)) {
-      setCompletedSteps([...completedSteps, currentStep])
+  const completeStep = (step: number) => {
+    if (!completedSteps.includes(step)) {
+      setCompletedSteps([...completedSteps, step])
     }
-    setCurrentStep(currentStep + 1)
+    setCurrentStep(step + 1)
+  }
+
+  // Step 1: 記事取得完了
+  const handleArticleComplete = (article: Article) => {
+    setProject((prev) => ({ ...prev, article }))
+    completeStep(1)
+  }
+
+  // Step 2: 台本確定
+  const handleScriptComplete = () => {
+    completeStep(2)
   }
 
   return (
@@ -28,42 +60,33 @@ export default function CreatePage() {
       onStepClick={handleStepClick}
       completedSteps={completedSteps}
     >
-      {/* Step 1: URL入力 */}
+      {/* Step 1: URL入力・記事取得 */}
       {currentStep === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 1: 記事URL入力</CardTitle>
-            <CardDescription>
-              note.comの記事URLを入力してください
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              placeholder="https://note.com/username/n/xxxxxxxx"
-              className="w-full"
-            />
-            <Button onClick={handleNextStep} className="w-full">
-              記事を取得
-            </Button>
-          </CardContent>
-        </Card>
+        <Step1UrlInput onComplete={handleArticleComplete} />
       )}
 
-      {/* Step 2: 台本 */}
+      {/* Step 2: 台本編集 */}
       {currentStep === 2 && (
         <Card>
           <CardHeader>
             <CardTitle>Step 2: 台本編集</CardTitle>
             <CardDescription>
-              生成された台本を編集できます
+              取得した記事: {project.article?.title}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <h4 className="font-medium mb-2">記事内容</h4>
+              <p className="text-sm text-muted-foreground line-clamp-5">
+                {project.article?.content}
+              </p>
+            </div>
             <Textarea
-              placeholder="台本がここに表示されます..."
+              placeholder="台本がここに表示されます...（次のチケットで実装）"
               className="min-h-[200px]"
+              defaultValue={project.script || ''}
             />
-            <Button onClick={handleNextStep} className="w-full">
+            <Button onClick={handleScriptComplete} className="w-full">
               次へ
             </Button>
           </CardContent>
@@ -76,7 +99,7 @@ export default function CreatePage() {
           <CardHeader>
             <CardTitle>Step 3: 画像生成</CardTitle>
             <CardDescription>
-              4枚の画像を生成します
+              4枚の画像を生成します（次のチケットで実装）
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -90,7 +113,7 @@ export default function CreatePage() {
                 </div>
               ))}
             </div>
-            <Button onClick={handleNextStep} className="w-full">
+            <Button onClick={() => completeStep(3)} className="w-full">
               次へ
             </Button>
           </CardContent>
@@ -103,7 +126,7 @@ export default function CreatePage() {
           <CardHeader>
             <CardTitle>Step 4: 音声生成</CardTitle>
             <CardDescription>
-              ナレーション音声を生成します
+              ナレーション音声を生成します（次のチケットで実装）
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -115,7 +138,7 @@ export default function CreatePage() {
                 女性ボイス
               </Button>
             </div>
-            <Button onClick={handleNextStep} className="w-full">
+            <Button onClick={() => completeStep(4)} className="w-full">
               次へ
             </Button>
           </CardContent>
@@ -128,7 +151,7 @@ export default function CreatePage() {
           <CardHeader>
             <CardTitle>Step 5: BGM選択</CardTitle>
             <CardDescription>
-              BGMを選択してください（任意）
+              BGMを選択してください（次のチケットで実装）
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -139,7 +162,7 @@ export default function CreatePage() {
                 </Button>
               ))}
             </div>
-            <Button onClick={handleNextStep} className="w-full">
+            <Button onClick={() => completeStep(5)} className="w-full">
               次へ
             </Button>
           </CardContent>
@@ -152,7 +175,7 @@ export default function CreatePage() {
           <CardHeader>
             <CardTitle>Step 6: 動画書き出し</CardTitle>
             <CardDescription>
-              動画を生成してダウンロード
+              動画を生成してダウンロード（次のチケットで実装）
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
