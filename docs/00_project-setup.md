@@ -21,12 +21,12 @@ Next.js 15プロジェクトの基盤設定を行う。shadcn/ui導入、Supabas
 
 ## タスク
 
-- [ ] shadcn/ui初期化・設定
-- [ ] ダークテーマ設定（Notion/Discord風）
-- [ ] Supabaseクライアント設定
-- [ ] 環境変数ファイル作成（.env.local）
-- [ ] 基本的なフォルダ構成作成
-- [ ] Supabase型定義生成設定
+- [x] shadcn/ui初期化・設定
+- [x] ダークテーマ設定（Notion/Discord風）
+- [x] Supabaseクライアント設定
+- [x] 環境変数ファイル作成（.env.local）
+- [x] 基本的なフォルダ構成作成
+- [x] Supabase型定義生成設定
 
 ## 参考
 
