@@ -4,14 +4,15 @@ import { useState } from 'react'
 import { EditorLayout } from '@/components/layout/editor-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { Step1UrlInput } from '@/components/steps/step1-url-input'
+import { Step2Script } from '@/components/steps/step2-script'
 import { Article } from '@/types/article'
+import { Script } from '@/types/script'
 
 // プロジェクト全体の状態
 interface ProjectState {
   article: Article | null
-  script: string | null
+  script: Script | null
   images: string[]
   voiceUrl: string | null
   voiceType: 'male' | 'female' | null
@@ -50,7 +51,8 @@ export default function CreatePage() {
   }
 
   // Step 2: 台本確定
-  const handleScriptComplete = () => {
+  const handleScriptComplete = (script: Script) => {
+    setProject((prev) => ({ ...prev, script }))
     completeStep(2)
   }
 
@@ -66,31 +68,11 @@ export default function CreatePage() {
       )}
 
       {/* Step 2: 台本編集 */}
-      {currentStep === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 2: 台本編集</CardTitle>
-            <CardDescription>
-              取得した記事: {project.article?.title}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">記事内容</h4>
-              <p className="text-sm text-muted-foreground line-clamp-5">
-                {project.article?.content}
-              </p>
-            </div>
-            <Textarea
-              placeholder="台本がここに表示されます...（次のチケットで実装）"
-              className="min-h-[200px]"
-              defaultValue={project.script || ''}
-            />
-            <Button onClick={handleScriptComplete} className="w-full">
-              次へ
-            </Button>
-          </CardContent>
-        </Card>
+      {currentStep === 2 && project.article && (
+        <Step2Script
+          article={project.article}
+          onComplete={handleScriptComplete}
+        />
       )}
 
       {/* Step 3: 画像 */}
