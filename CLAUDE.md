@@ -20,7 +20,7 @@ npm start        # プロダクションサーバー起動
 - **Frontend:** Next.js 15 (App Router), React 19, TypeScript
 - **Styling:** Tailwind CSS, shadcn/ui
 - **Backend:** Supabase (Auth, DB, Storage)
-- **Video:** FFmpeg（非同期処理）
+- **Video:** ffmpeg.wasm（クライアントサイド）
 
 ## Architecture
 
@@ -83,10 +83,10 @@ src/
 | 02 | UIレイアウト | 完了 |
 | 03 | URL入力・記事取得 | 完了 |
 | 04 | 台本生成 | 完了 |
-| 05 | 画像生成 | 未着手 |
-| 06 | 音声生成 | 未着手 |
-| 07 | BGM選択 | 未着手 |
-| 08 | 動画書き出し | 未着手 |
+| 05 | 画像生成 | 完了 |
+| 06 | 音声生成 | 完了 |
+| 07 | BGM選択 | 完了 |
+| 08 | 動画書き出し | 完了 |
 | 09 | マイページ | 未着手 |
 | 10 | 仕上げ | 未着手 |
 

@@ -2,30 +2,36 @@
 
 import { useState } from 'react'
 import { EditorLayout } from '@/components/layout/editor-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Step1UrlInput } from '@/components/steps/step1-url-input'
 import { Step2Script } from '@/components/steps/step2-script'
+import { Step3Images } from '@/components/steps/step3-images'
+import { Step4Voice } from '@/components/steps/step4-voice'
+import { Step5BGM } from '@/components/steps/step5-bgm'
+import { Step6Export } from '@/components/steps/step6-export'
 import { Article } from '@/types/article'
 import { Script } from '@/types/script'
+import { GeneratedImage } from '@/types/image'
+import { VoiceAudio } from '@/types/voice'
+import { BGMTrack } from '@/types/bgm'
+import { ExportedVideo } from '@/types/video'
 
 // プロジェクト全体の状態
 interface ProjectState {
   article: Article | null
   script: Script | null
-  images: string[]
-  voiceUrl: string | null
-  voiceType: 'male' | 'female' | null
-  bgmUrl: string | null
+  images: GeneratedImage[]
+  voice: VoiceAudio | null
+  bgm: BGMTrack | null // nullの場合はBGMなし
+  video: ExportedVideo | null
 }
 
 const initialState: ProjectState = {
   article: null,
   script: null,
   images: [],
-  voiceUrl: null,
-  voiceType: null,
-  bgmUrl: null,
+  voice: null,
+  bgm: null,
+  video: null,
 }
 
 export default function CreatePage() {
@@ -56,6 +62,33 @@ export default function CreatePage() {
     completeStep(2)
   }
 
+  // Step 3: 画像確定
+  const handleImagesComplete = (images: GeneratedImage[]) => {
+    setProject((prev) => ({ ...prev, images }))
+    completeStep(3)
+  }
+
+  // Step 4: 音声確定
+  const handleVoiceComplete = (voice: VoiceAudio) => {
+    setProject((prev) => ({ ...prev, voice }))
+    completeStep(4)
+  }
+
+  // Step 5: BGM確定
+  const handleBGMComplete = (bgm: BGMTrack | null) => {
+    setProject((prev) => ({ ...prev, bgm }))
+    completeStep(5)
+  }
+
+  // Step 6: 動画完成
+  const handleVideoComplete = (video: ExportedVideo) => {
+    setProject((prev) => ({ ...prev, video }))
+    // 完成後は最初からやり直し
+    setProject(initialState)
+    setCurrentStep(1)
+    setCompletedSteps([])
+  }
+
   return (
     <EditorLayout
       currentStep={currentStep}
@@ -76,102 +109,36 @@ export default function CreatePage() {
       )}
 
       {/* Step 3: 画像 */}
-      {currentStep === 3 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 3: 画像生成</CardTitle>
-            <CardDescription>
-              4枚の画像を生成します（次のチケットで実装）
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-[9/16] bg-muted rounded-lg flex items-center justify-center"
-                >
-                  <span className="text-muted-foreground">画像 {i}</span>
-                </div>
-              ))}
-            </div>
-            <Button onClick={() => completeStep(3)} className="w-full">
-              次へ
-            </Button>
-          </CardContent>
-        </Card>
+      {currentStep === 3 && project.script && (
+        <Step3Images
+          script={project.script}
+          onComplete={handleImagesComplete}
+        />
       )}
 
       {/* Step 4: 音声 */}
-      {currentStep === 4 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 4: 音声生成</CardTitle>
-            <CardDescription>
-              ナレーション音声を生成します（次のチケットで実装）
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Button variant="outline" className="flex-1">
-                男性ボイス
-              </Button>
-              <Button variant="outline" className="flex-1">
-                女性ボイス
-              </Button>
-            </div>
-            <Button onClick={() => completeStep(4)} className="w-full">
-              次へ
-            </Button>
-          </CardContent>
-        </Card>
+      {currentStep === 4 && project.script && (
+        <Step4Voice
+          script={project.script}
+          onComplete={handleVoiceComplete}
+        />
       )}
 
       {/* Step 5: BGM */}
       {currentStep === 5 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 5: BGM選択</CardTitle>
-            <CardDescription>
-              BGMを選択してください（次のチケットで実装）
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              {['BGM候補 1', 'BGM候補 2', 'BGM候補 3', 'BGMなし'].map((bgm) => (
-                <Button key={bgm} variant="outline" className="w-full justify-start">
-                  {bgm}
-                </Button>
-              ))}
-            </div>
-            <Button onClick={() => completeStep(5)} className="w-full">
-              次へ
-            </Button>
-          </CardContent>
-        </Card>
+        <Step5BGM onComplete={handleBGMComplete} />
       )}
 
       {/* Step 6: 書き出し */}
-      {currentStep === 6 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Step 6: 動画書き出し</CardTitle>
-            <CardDescription>
-              動画を生成してダウンロード（次のチケットで実装）
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center py-8">
-              <div className="text-4xl mb-4">🎬</div>
-              <p className="text-muted-foreground mb-4">
-                準備完了！動画を生成しましょう
-              </p>
-            </div>
-            <Button className="w-full">
-              動画を生成
-            </Button>
-          </CardContent>
-        </Card>
+      {currentStep === 6 && project.article && project.script && project.voice && (
+        <Step6Export
+          article={project.article}
+          script={project.script}
+          images={project.images}
+          voice={project.voice}
+          bgm={project.bgm}
+          onComplete={handleVideoComplete}
+        />
       )}
     </EditorLayout>
   )
