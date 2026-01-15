@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClipTrailerは、note.comの記事から15秒のショート動画（TikTok、YouTube Shorts、Instagram Reels向け）を自動生成するNext.js 15アプリケーションです。
+ClipTrailerは、note.comの記事からショート動画（TikTok、YouTube Shorts、Instagram Reels向け）を自動生成するNext.js 15アプリケーションです。動画の尺は音声の長さ+3秒で自動調整されます。
 
 ## Development Commands
 
@@ -89,6 +89,23 @@ src/
 | 08 | 動画書き出し | 完了 |
 | 09 | マイページ | 未着手 |
 | 10 | 仕上げ | 未着手 |
+
+## 実装詳細
+
+### 台本テンプレート
+- **おまかせ（デフォルト）**: AIが記事を分析して最適な構成を判断
+- 失敗談 / 成功談 / 開発ストーリー / How-to / レビュー・紹介 / 汎用
+
+### BGM
+3曲から選択（`public/bgm/`に配置）
+- `bright.mp3` - 明るい・軽快
+- `chill.mp3` - 落ち着いた・チル
+- `stylish.mp3` - スタイリッシュ・クール
+
+### 動画生成
+- ffmpeg.wasmでクライアントサイド処理
+- 動画尺: 音声の長さ + 3秒
+- BGM音量: 30%（フェードアウト付き）
 
 ## Notes
 

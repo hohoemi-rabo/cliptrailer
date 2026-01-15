@@ -21,18 +21,16 @@ interface Step2ScriptProps {
   onComplete: (script: Script) => void
 }
 
+// 表示順序を定義（おまかせを先頭に）
+const TEMPLATE_ORDER: TemplateType[] = ['auto', 'failure', 'success', 'development', 'howto', 'review', 'general']
+
 export function Step2Script({ article, onComplete }: Step2ScriptProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('auto')
   const [isGenerating, setIsGenerating] = useState(false)
   const [script, setScript] = useState<Script | null>(null)
   const [editedFullText, setEditedFullText] = useState('')
 
   const handleGenerate = async () => {
-    if (!selectedTemplate) {
-      toast.error('テンプレートを選択してください')
-      return
-    }
-
     setIsGenerating(true)
     try {
       const result = await generateScript({
@@ -97,19 +95,40 @@ export function Step2Script({ article, onComplete }: Step2ScriptProps) {
       {/* テンプレート選択 */}
       <div className="space-y-3">
         <h3 className="font-medium">テンプレートを選択</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {(Object.keys(TEMPLATE_LABELS) as TemplateType[]).map((template) => (
+
+        {/* おまかせオプション（目立つ位置に） */}
+        <button
+          onClick={() => setSelectedTemplate('auto')}
+          className={`w-full p-4 rounded-lg border text-left transition-all ${
+            selectedTemplate === 'auto'
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:border-primary/50'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg">✨</span>
+            <p className="font-medium">{TEMPLATE_LABELS['auto']}</p>
+            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">おすすめ</span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {TEMPLATE_DESCRIPTIONS['auto']}
+          </p>
+        </button>
+
+        {/* 手動選択オプション */}
+        <div className="grid grid-cols-2 gap-2">
+          {TEMPLATE_ORDER.filter(t => t !== 'auto').map((template) => (
             <button
               key={template}
               onClick={() => setSelectedTemplate(template)}
-              className={`p-4 rounded-lg border text-left transition-all ${
+              className={`p-3 rounded-lg border text-left transition-all ${
                 selectedTemplate === template
                   ? 'border-primary bg-primary/10'
                   : 'border-border hover:border-primary/50'
               }`}
             >
-              <p className="font-medium">{TEMPLATE_LABELS[template]}</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="font-medium text-sm">{TEMPLATE_LABELS[template]}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {TEMPLATE_DESCRIPTIONS[template]}
               </p>
             </button>
@@ -120,7 +139,7 @@ export function Step2Script({ article, onComplete }: Step2ScriptProps) {
       {/* 生成ボタン */}
       <Button
         onClick={handleGenerate}
-        disabled={!selectedTemplate || isGenerating}
+        disabled={isGenerating}
         className="w-full"
         size="lg"
       >

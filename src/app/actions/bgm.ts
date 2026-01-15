@@ -5,59 +5,32 @@ import {
   GenerateBGMResult,
 } from '@/types/bgm'
 
-// フリーBGMリスト（public/bgm/ に配置）
-// ※ファイルを追加したらここにも追記してください
-// ※name/genreは曲を聴いてから適宜変更してください
-const FREE_BGM_TRACKS: Omit<BGMTrack, 'id'>[] = [
+// BGMリスト（public/bgm/ に配置）
+const BGM_TRACKS: Omit<BGMTrack, 'id'>[] = [
   {
-    name: 'BGM 1',
-    url: '/bgm/bgm-01.mp3',
+    name: '明るい・軽快',
+    url: '/bgm/bright.mp3',
     duration: 30,
-    genre: 'BGM',
+    genre: 'Bright / Pop',
   },
   {
-    name: 'BGM 2',
-    url: '/bgm/bgm-02.mp3',
+    name: '落ち着いた・チル',
+    url: '/bgm/chill.mp3',
     duration: 30,
-    genre: 'BGM',
+    genre: 'Chill / Lo-fi',
   },
   {
-    name: 'BGM 3',
-    url: '/bgm/bgm-03.mp3',
+    name: 'スタイリッシュ・クール',
+    url: '/bgm/stylish.mp3',
     duration: 30,
-    genre: 'BGM',
-  },
-  {
-    name: 'BGM 4',
-    url: '/bgm/bgm-04.mp3',
-    duration: 30,
-    genre: 'BGM',
-  },
-  {
-    name: 'BGM 5',
-    url: '/bgm/bgm-05.mp3',
-    duration: 30,
-    genre: 'BGM',
+    genre: 'Stylish / Tech',
   },
 ]
 
-// 配列をシャッフル
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
 export async function generateBGM(): Promise<GenerateBGMResult> {
   try {
-    // リストからランダムに3曲を選択
-    const shuffled = shuffleArray(FREE_BGM_TRACKS)
-    const selected = shuffled.slice(0, 3)
-
-    const tracks: BGMTrack[] = selected.map((track, index) => ({
+    // 3曲すべてを返す
+    const tracks: BGMTrack[] = BGM_TRACKS.map((track, index) => ({
       ...track,
       id: `bgm-${Date.now()}-${index}`,
     }))

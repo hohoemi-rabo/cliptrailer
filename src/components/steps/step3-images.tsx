@@ -151,24 +151,66 @@ export function Step3Images({ script, onComplete }: Step3ImagesProps) {
 
       {/* 生成ボタン */}
       {images.length === 0 && (
-        <Button
-          onClick={handleGenerateAll}
-          disabled={isGenerating}
-          className="w-full"
-          size="lg"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              生成中...（時間がかかる場合があります）
-            </>
-          ) : (
-            <>
-              <Sparkles className="mr-2 h-4 w-4" />
-              AIで4枚の画像を生成
-            </>
-          )}
-        </Button>
+        <div className="space-y-2">
+          <Button
+            onClick={handleGenerateAll}
+            disabled={isGenerating}
+            className="w-full"
+            size="lg"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                生成中...（時間がかかる場合があります）
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                AIで4枚の画像を生成
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              // 仮画像を設定（Canvasで生成）
+              const colors = ['#4f46e5', '#0891b2', '#059669', '#d97706']
+              const placeholderImages: GeneratedImage[] = SECTION_KEYS.map((key, index) => {
+                // Canvasで縦長の仮画像を生成
+                const canvas = document.createElement('canvas')
+                canvas.width = 1080
+                canvas.height = 1920
+                const ctx = canvas.getContext('2d')!
+                // 背景色
+                ctx.fillStyle = colors[index]
+                ctx.fillRect(0, 0, 1080, 1920)
+                // テキスト
+                ctx.fillStyle = '#ffffff'
+                ctx.font = 'bold 120px sans-serif'
+                ctx.textAlign = 'center'
+                ctx.textBaseline = 'middle'
+                ctx.fillText(SECTION_LABELS[index], 540, 960)
+                // Data URLに変換
+                const dataUrl = canvas.toDataURL('image/png')
+                return {
+                  id: `placeholder-${Date.now()}-${index}`,
+                  index,
+                  url: dataUrl,
+                  prompt: `Placeholder for ${key}`,
+                  isUserUploaded: false,
+                  createdAt: new Date(),
+                }
+              })
+              setImages(placeholderImages)
+              toast.success('仮画像を設定しました（開発用）')
+            }}
+            disabled={isGenerating}
+            className="w-full"
+          >
+            <ImageIcon className="mr-2 h-4 w-4" />
+            仮画像でスキップ（開発用）
+          </Button>
+        </div>
       )}
 
       {/* 画像グリッド */}

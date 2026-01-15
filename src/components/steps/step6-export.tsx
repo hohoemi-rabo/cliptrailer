@@ -105,8 +105,10 @@ export function Step6Export({
         await ffmpeg.writeFile('bgm.mp3', await fetchFile(bgm.url))
       }
 
-      // 5. 画像の表示時間を計算（音声長に合わせて均等割り）
-      const imageDuration = Math.max(voice.duration / 4, 2) // 最低2秒
+      // 5. 動画の合計時間を計算（音声長 + 3秒のバッファ）
+      const totalDuration = Math.ceil(voice.duration) + 3
+      // 各画像の表示時間を計算（均等割り）
+      const imageDuration = Math.max(totalDuration / 4, 2) // 最低2秒
 
       // 6. 画像リストファイルを作成
       let concatContent = ''
@@ -120,6 +122,9 @@ export function Step6Export({
       // 7. 動画合成
       setProgressMessage('動画を生成中...')
 
+      // BGMのフェードアウト開始位置（終了2秒前から）
+      const fadeOutStart = totalDuration - 2
+
       if (bgm) {
         // BGMあり: 音声とBGMをミックス
         await ffmpeg.exec([
@@ -129,13 +134,13 @@ export function Step6Export({
           '-i', 'voice.wav',
           '-i', 'bgm.mp3',
           '-filter_complex',
-          '[1:a]volume=1.0[voice];[2:a]volume=0.3,afade=t=out:st=13:d=2[bgm];[voice][bgm]amix=inputs=2:duration=first[a]',
+          `[1:a]volume=1.0[voice];[2:a]volume=0.3,afade=t=out:st=${fadeOutStart}:d=2[bgm];[voice][bgm]amix=inputs=2:duration=first[a]`,
           '-map', '0:v',
           '-map', '[a]',
           '-c:v', 'libx264',
           '-pix_fmt', 'yuv420p',
           '-r', '30',
-          '-t', '15',
+          '-t', String(totalDuration),
           '-y',
           'output.mp4'
         ])
@@ -151,7 +156,7 @@ export function Step6Export({
           '-c:v', 'libx264',
           '-pix_fmt', 'yuv420p',
           '-r', '30',
-          '-t', '15',
+          '-t', String(totalDuration),
           '-y',
           'output.mp4'
         ])
@@ -184,7 +189,7 @@ export function Step6Export({
         caption: captionResult.success ? captionResult.caption! : '',
         hashtags: captionResult.success ? captionResult.hashtags! : [],
         subtitlesEnabled,
-        duration: 15,
+        duration: totalDuration,
         createdAt: new Date(),
       }
 
@@ -344,11 +349,15 @@ export function Step6Export({
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">音声</span>
-            <span>約{voice.duration}秒</span>
+            <span>約{Math.ceil(voice.duration)}秒</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">BGM</span>
             <span>{bgm ? bgm.name : 'なし'}</span>
+          </div>
+          <div className="flex justify-between font-medium border-t pt-2 mt-2">
+            <span>動画の尺</span>
+            <span>約{Math.ceil(voice.duration) + 3}秒</span>
           </div>
         </CardContent>
       </Card>
