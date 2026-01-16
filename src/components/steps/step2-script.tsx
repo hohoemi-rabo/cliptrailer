@@ -22,7 +22,7 @@ interface Step2ScriptProps {
 }
 
 // 表示順序を定義（おまかせを先頭に）
-const TEMPLATE_ORDER: TemplateType[] = ['auto', 'failure', 'success', 'development', 'howto', 'review', 'general']
+const TEMPLATE_ORDER: TemplateType[] = ['auto', 'failure', 'success', 'development', 'howto', 'review', 'product', 'general']
 
 export function Step2Script({ article, onComplete }: Step2ScriptProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('auto')

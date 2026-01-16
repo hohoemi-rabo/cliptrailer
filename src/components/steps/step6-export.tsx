@@ -77,6 +77,80 @@ export function Step6Export({
     return response.blob()
   }
 
+  // 画像に字幕を追加する関数
+  const addSubtitleToImage = async (imageUrl: string, text: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width || 1080
+        canvas.height = img.height || 1920
+        const ctx = canvas.getContext('2d')!
+
+        // 元の画像を描画
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+        // 字幕スタイル設定
+        const maxWidth = canvas.width * 0.9
+        const fontSize = Math.floor(canvas.width / 18) // 画像幅に応じたフォントサイズ
+        ctx.font = `bold ${fontSize}px sans-serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'bottom'
+
+        // テキストを複数行に分割
+        const words = text.split('')
+        const lines: string[] = []
+        let currentLine = ''
+
+        for (const char of words) {
+          const testLine = currentLine + char
+          const metrics = ctx.measureText(testLine)
+          if (metrics.width > maxWidth && currentLine !== '') {
+            lines.push(currentLine)
+            currentLine = char
+          } else {
+            currentLine = testLine
+          }
+        }
+        if (currentLine) {
+          lines.push(currentLine)
+        }
+
+        // 字幕の位置（下部）
+        const lineHeight = fontSize * 1.3
+        const totalHeight = lines.length * lineHeight
+        const startY = canvas.height - 100 - totalHeight
+
+        // 半透明の背景を描画
+        const padding = 20
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+        ctx.fillRect(
+          (canvas.width - maxWidth) / 2 - padding,
+          startY - fontSize - padding,
+          maxWidth + padding * 2,
+          totalHeight + padding * 2
+        )
+
+        // テキストを描画（白文字 + 黒縁）
+        lines.forEach((line, index) => {
+          const y = startY + index * lineHeight
+          // 黒縁
+          ctx.strokeStyle = 'black'
+          ctx.lineWidth = 4
+          ctx.strokeText(line, canvas.width / 2, y)
+          // 白文字
+          ctx.fillStyle = 'white'
+          ctx.fillText(line, canvas.width / 2, y)
+        })
+
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.onerror = reject
+      img.src = imageUrl
+    })
+  }
+
   // 動画生成
   const handleGenerate = async () => {
     setIsGenerating(true)
@@ -87,10 +161,21 @@ export function Step6Export({
       setProgressMessage('FFmpegを読み込み中...')
       const ffmpeg = await loadFFmpeg()
 
-      // 2. 画像ファイルを書き込み
-      setProgressMessage('画像を処理中...')
+      // 2. 画像ファイルを書き込み（字幕がONの場合は字幕を追加）
+      setProgressMessage(subtitlesEnabled ? '画像に字幕を追加中...' : '画像を処理中...')
+
+      // 各画像に対応するテキスト
+      const subtitleTexts = [script.hook, script.benefit, script.conclusion, script.cta]
+
       for (let i = 0; i < images.length; i++) {
-        const imageBlob = await base64ToBlob(images[i].url)
+        let imageUrl = images[i].url
+
+        // 字幕がONの場合、画像に字幕を追加
+        if (subtitlesEnabled) {
+          imageUrl = await addSubtitleToImage(imageUrl, subtitleTexts[i])
+        }
+
+        const imageBlob = await base64ToBlob(imageUrl)
         await ffmpeg.writeFile(`image${i}.png`, await fetchFile(imageBlob))
       }
 
@@ -367,18 +452,22 @@ export function Step6Export({
         <h3 className="font-medium">オプション</h3>
         <button
           onClick={() => setSubtitlesEnabled(!subtitlesEnabled)}
-          disabled={true} // MVPでは字幕機能は無効
-          className={`w-full p-4 rounded-lg border text-left transition-all flex items-center gap-3 opacity-50 cursor-not-allowed ${
+          className={`w-full p-4 rounded-lg border text-left transition-all flex items-center gap-3 ${
             subtitlesEnabled
               ? 'border-primary bg-primary/10'
-              : 'border-border'
+              : 'border-border hover:border-primary/50'
           }`}
         >
+          <div className={`w-5 h-5 rounded border flex items-center justify-center ${
+            subtitlesEnabled ? 'bg-primary border-primary' : 'border-muted-foreground'
+          }`}>
+            {subtitlesEnabled && <Check className="w-3 h-3 text-primary-foreground" />}
+          </div>
           <Subtitles className="h-5 w-5 text-muted-foreground" />
           <div>
             <p className="font-medium">字幕を追加</p>
             <p className="text-sm text-muted-foreground">
-              （今後のアップデートで対応予定）
+              台本テキストを画像に焼き込みます
             </p>
           </div>
         </button>

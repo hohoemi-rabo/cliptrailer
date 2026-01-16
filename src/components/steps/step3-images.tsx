@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Script } from '@/types/script'
-import { GeneratedImage } from '@/types/image'
+import { GeneratedImage, ImageStyle, IMAGE_STYLE_LABELS, IMAGE_STYLE_DESCRIPTIONS } from '@/types/image'
 import { generateAllImages, generateSingleImage } from '@/app/actions/image'
 
 interface Step3ImagesProps {
@@ -23,10 +23,13 @@ const SECTION_KEYS: Array<'hook' | 'benefit' | 'conclusion' | 'cta'> = [
   'cta',
 ]
 
+const STYLE_OPTIONS: ImageStyle[] = ['modern', 'illustration']
+
 export function Step3Images({ script, onComplete }: Step3ImagesProps) {
   const [images, setImages] = useState<GeneratedImage[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null)
+  const [selectedStyle, setSelectedStyle] = useState<ImageStyle>('modern')
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const handleGenerateAll = async () => {
@@ -37,6 +40,7 @@ export function Step3Images({ script, onComplete }: Step3ImagesProps) {
         scriptBenefit: script.benefit,
         scriptConclusion: script.conclusion,
         scriptCta: script.cta,
+        style: selectedStyle,
       })
 
       if (result.success && result.images) {
@@ -62,7 +66,7 @@ export function Step3Images({ script, onComplete }: Step3ImagesProps) {
     try {
       const sectionKey = SECTION_KEYS[index]
       const content = script[sectionKey]
-      const result = await generateSingleImage(sectionKey, content, index)
+      const result = await generateSingleImage(sectionKey, content, index, selectedStyle)
 
       if (result.success && result.image) {
         setImages((prev) => {
@@ -149,68 +153,88 @@ export function Step3Images({ script, onComplete }: Step3ImagesProps) {
         </CardContent>
       </Card>
 
+      {/* スタイル選択 */}
+      {images.length === 0 && (
+        <div className="space-y-3">
+          <h3 className="font-medium">画像スタイルを選択</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {STYLE_OPTIONS.map((style) => (
+              <button
+                key={style}
+                onClick={() => setSelectedStyle(style)}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                  selectedStyle === style
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <p className="font-medium text-sm">{IMAGE_STYLE_LABELS[style]}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {IMAGE_STYLE_DESCRIPTIONS[style]}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 生成ボタン */}
       {images.length === 0 && (
-        <div className="space-y-2">
-          <Button
-            onClick={handleGenerateAll}
-            disabled={isGenerating}
-            className="w-full"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                生成中...（時間がかかる場合があります）
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                AIで4枚の画像を生成
-              </>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              // 仮画像を設定（Canvasで生成）
-              const colors = ['#4f46e5', '#0891b2', '#059669', '#d97706']
-              const placeholderImages: GeneratedImage[] = SECTION_KEYS.map((key, index) => {
-                // Canvasで縦長の仮画像を生成
-                const canvas = document.createElement('canvas')
-                canvas.width = 1080
-                canvas.height = 1920
-                const ctx = canvas.getContext('2d')!
-                // 背景色
-                ctx.fillStyle = colors[index]
-                ctx.fillRect(0, 0, 1080, 1920)
-                // テキスト
-                ctx.fillStyle = '#ffffff'
-                ctx.font = 'bold 120px sans-serif'
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                ctx.fillText(SECTION_LABELS[index], 540, 960)
-                // Data URLに変換
-                const dataUrl = canvas.toDataURL('image/png')
-                return {
-                  id: `placeholder-${Date.now()}-${index}`,
-                  index,
-                  url: dataUrl,
-                  prompt: `Placeholder for ${key}`,
-                  isUserUploaded: false,
-                  createdAt: new Date(),
-                }
-              })
-              setImages(placeholderImages)
-              toast.success('仮画像を設定しました（開発用）')
-            }}
-            disabled={isGenerating}
-            className="w-full"
-          >
-            <ImageIcon className="mr-2 h-4 w-4" />
-            仮画像でスキップ（開発用）
-          </Button>
-        </div>
+        <Button
+          onClick={handleGenerateAll}
+          disabled={isGenerating}
+          className="w-full"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              生成中...（時間がかかる場合があります）
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-2 h-4 w-4" />
+              AIで4枚の画像を生成
+            </>
+          )}
+        </Button>
+        /* 開発用：仮画像でスキップ（コメントアウト）
+        <Button
+          variant="outline"
+          onClick={() => {
+            const colors = ['#4f46e5', '#0891b2', '#059669', '#d97706']
+            const placeholderImages: GeneratedImage[] = SECTION_KEYS.map((key, index) => {
+              const canvas = document.createElement('canvas')
+              canvas.width = 1080
+              canvas.height = 1920
+              const ctx = canvas.getContext('2d')!
+              ctx.fillStyle = colors[index]
+              ctx.fillRect(0, 0, 1080, 1920)
+              ctx.fillStyle = '#ffffff'
+              ctx.font = 'bold 120px sans-serif'
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'middle'
+              ctx.fillText(SECTION_LABELS[index], 540, 960)
+              const dataUrl = canvas.toDataURL('image/png')
+              return {
+                id: `placeholder-${Date.now()}-${index}`,
+                index,
+                url: dataUrl,
+                prompt: `Placeholder for ${key}`,
+                isUserUploaded: false,
+                createdAt: new Date(),
+              }
+            })
+            setImages(placeholderImages)
+            toast.success('仮画像を設定しました（開発用）')
+          }}
+          disabled={isGenerating}
+          className="w-full"
+        >
+          <ImageIcon className="mr-2 h-4 w-4" />
+          仮画像でスキップ（開発用）
+        </Button>
+        */
       )}
 
       {/* 画像グリッド */}

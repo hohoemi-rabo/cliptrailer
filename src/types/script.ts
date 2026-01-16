@@ -1,4 +1,4 @@
-export type TemplateType = 'auto' | 'failure' | 'success' | 'development' | 'howto' | 'review' | 'general'
+export type TemplateType = 'auto' | 'failure' | 'success' | 'development' | 'howto' | 'review' | 'product' | 'general'
 
 export interface Script {
   template: TemplateType
@@ -29,6 +29,7 @@ export const TEMPLATE_LABELS: Record<TemplateType, string> = {
   development: '開発ストーリー',
   howto: 'How-to',
   review: 'レビュー・紹介',
+  product: 'プロダクト宣伝',
   general: '汎用',
 }
 
@@ -39,5 +40,6 @@ export const TEMPLATE_DESCRIPTIONS: Record<TemplateType, string> = {
   development: '開発過程やプロセスを紹介',
   howto: '具体的なやり方・手順を解説',
   review: '商品や作品の魅力をポイント解説',
+  product: 'サービスやアプリの利用を促す',
   general: 'どんな記事にも使える万能型',
 }
