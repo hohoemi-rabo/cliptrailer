@@ -1,13 +1,13 @@
 export type ImageStyle = 'modern' | 'illustration'
 
 export const IMAGE_STYLE_LABELS: Record<ImageStyle, string> = {
-  modern: 'モダン・クリーン',
-  illustration: 'イラスト風',
+  modern: 'マンガ風キャラ入り',
+  illustration: 'イラスト風（人物なし）',
 }
 
 export const IMAGE_STYLE_DESCRIPTIONS: Record<ImageStyle, string> = {
-  modern: 'シンプルで洗練されたデザイン',
-  illustration: 'フラットでポップなイラスト調',
+  modern: 'noteサムネ風、キャラクター付き',
+  illustration: 'フラットでポップ、抽象的',
 }
 
 export interface GeneratedImage {
