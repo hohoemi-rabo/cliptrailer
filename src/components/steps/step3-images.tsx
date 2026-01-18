@@ -23,7 +23,7 @@ const SECTION_KEYS: Array<'hook' | 'benefit' | 'conclusion' | 'cta'> = [
   'cta',
 ]
 
-const STYLE_OPTIONS: ImageStyle[] = ['modern', 'illustration']
+const STYLE_OPTIONS: ImageStyle[] = ['modern', 'female', 'pixel', 'illustration']
 
 export function Step3Images({ script, onComplete }: Step3ImagesProps) {
   const [images, setImages] = useState<GeneratedImage[]>([])

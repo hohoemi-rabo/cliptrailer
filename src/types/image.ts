@@ -1,12 +1,16 @@
-export type ImageStyle = 'modern' | 'illustration'
+export type ImageStyle = 'modern' | 'female' | 'pixel' | 'illustration'
 
 export const IMAGE_STYLE_LABELS: Record<ImageStyle, string> = {
-  modern: 'マンガ風キャラ入り',
+  modern: 'マンガ風（男性キャラ）',
+  female: 'マンガ風（女性キャラ）',
+  pixel: 'ピクセルアート風',
   illustration: 'イラスト風（人物なし）',
 }
 
 export const IMAGE_STYLE_DESCRIPTIONS: Record<ImageStyle, string> = {
-  modern: 'noteサムネ風、キャラクター付き',
+  modern: 'テック系、プロフェッショナル',
+  female: 'クリエイティブ系、スタイリッシュ',
+  pixel: 'レトロゲーム風、ドット絵',
   illustration: 'フラットでポップ、抽象的',
 }
 
